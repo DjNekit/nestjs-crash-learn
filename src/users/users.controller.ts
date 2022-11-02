@@ -4,7 +4,10 @@ import { User } from './interfaces/User';
 import { CreateUserDto } from './dto/createUserDto';
 import { UpdateUserDto } from './dto/updateUserDto';
 
-@Controller('users')
+@Controller({
+  version: '1',
+  path: 'users'
+})
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
