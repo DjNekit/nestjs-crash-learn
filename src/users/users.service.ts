@@ -1,5 +1,7 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
+import { CreateUserDto } from './dto/createUserDto';
+import { UpdateUserDto } from './dto/updateUserDto';
 import { User } from './interfaces/User';
 
 @Injectable()
@@ -26,7 +28,7 @@ export class UsersService {
     return user;
   }
 
-  create(userData: Omit<User, 'id'>): User {
+  create(userData: CreateUserDto): User {
     try {
       const id = uuidv4();
 
@@ -44,19 +46,27 @@ export class UsersService {
     }
   }
 
-  update(updatedUser: User) {
-    const userIndex = this.users.findIndex(user => user.id === updatedUser.id);
+  update(updatedUserData: UpdateUserDto): User {
+    const user = this.users.find(user => user.id === updatedUserData.id);
 
-    if (userIndex === -1) {
+    if (!user) {
       throw new NotFoundException();
     }
+    const id = user.id;
+    const userIndex = this.users.findIndex(user => user.id === updatedUserData.id);
+
+    const updatedUser = {
+      ...user,
+      ...updatedUserData,
+      id
+    };
 
     this.users[userIndex] = updatedUser;
 
-    return this.users[userIndex];
+    return updatedUser;
   }
 
-  delete(id: string) {
+  delete(id: string): User[] {
     this.users = this.users.filter(user => user.id !== id);
 
     return this.users;
