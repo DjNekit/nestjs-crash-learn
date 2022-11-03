@@ -3,13 +3,14 @@ import { UsersService } from './users.service';
 import { User } from './interfaces/User';
 import { CreateUserDto } from './dto/createUserDto';
 import { UpdateUserDto } from './dto/updateUserDto';
-import { Roles } from '../guards/role.decorator';
+import { Roles } from '../decorators/role.decorator';
 import { RolesGuard } from '../guards/roles.guard';
 
 @Controller({
   version: '1',
   path: 'users'
 })
+@Roles('user')
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
