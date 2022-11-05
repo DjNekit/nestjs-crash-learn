@@ -31,10 +31,10 @@ export class UsersController {
     return await this.usersService.create(createUserDto);
   }
 
-  // @Patch()
-  // update(@Body() updateUserDto: UpdateUserDto): IUser {
-  //   return await this.usersService.update(updateUserDto);
-  // }
+  @Patch()
+  async update(@Body() updateUserDto: UpdateUserDto): Promise<IUser> {
+    return await this.usersService.update(updateUserDto);
+  }
 
   @Delete()
   async delete(@Body('id', ParseIntPipe) id: number): Promise<void> {

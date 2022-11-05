@@ -1,7 +1,5 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { IsUUID } from 'class-validator';
 import { CreateUserDto } from './createUserDto';
 
-export class UpdateUserDto extends PartialType(CreateUserDto) {
+export class UpdateUserDto extends CreateUserDto {
   id: number;
 }
