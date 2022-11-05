@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  backend:
+    image: node:18.2.0-alpine3.15
+    # build: server
+    command: npm run start:dev
+    restart: always
+    container_name: backend
+    working_dir: /app
+    volumes:
+      - './server:/app'
+    ports:
+      - '4000:4000'
+    environment:
+      PORT: 4000
+      NODE_ENV: development
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_PASSWORD: root
+      DB_USER: root
+    depends_on:
+      - mysql
+    networks:
+      - app
+
+  mysql:
+    image: mysql:latest
+    restart: always
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - app
+volumes:
+  mysql_data:
+
+networks:
+  app:
+    driver: bridge
