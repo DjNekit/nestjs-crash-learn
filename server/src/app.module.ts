@@ -2,7 +2,7 @@ import { User } from './users/entity/user.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
-import { ChatsModule } from './chats/chats.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -13,14 +13,11 @@ import { ChatsModule } from './chats/chats.module';
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: 'test',
-      entities: [
-        // __dirname +'/../**/*.entity{.ts,.js}'
-        User
-      ],
+      entities: [User],
       synchronize: process.env.NODE_ENV !== 'production',
     }),
+    AuthModule,
     UsersModule,
-    ChatsModule
   ]
 })
 export class AppModule {}
