@@ -37,15 +37,15 @@ export class UsersService {
     return user;
   }
 
-  async create(userData: CreateUserDto): Promise<IUser> {
+  async create(userData: CreateUserDto): Promise<void> {
     try {
-      const { email, name, password } = userData;
       const newUser = new User();
-      newUser.name = name;
-      newUser.email = email;
-      newUser.password = password;
 
-      return await this.usersRepository.save(newUser);
+      for (const userField in userData) {
+        newUser[userField] = userData[userField];
+      }
+
+      await this.usersRepository.save(newUser);
 
     } catch(e) {
       throw new InternalServerErrorException();

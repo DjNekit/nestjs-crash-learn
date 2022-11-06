@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { IUser } from '../users/interfaces/User';
+import { IUserData } from '../users/interfaces/User';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class AuthService {
     return userData;
   }
 
-  async login(user: Omit<IUser, 'password'>) {
+  async login(user: IUserData) {
     const { email, id } = user;
 
     const payload = {
