@@ -1,3 +1,4 @@
+import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 import { Body, Controller, Delete, Get, ParseIntPipe, Patch, Post, Put, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { IUser } from './interfaces/User';
@@ -27,6 +28,7 @@ export class UsersController {
   @Put()
   // @Roles('admin')
   @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard)
   async create(@Body() createUserDto: CreateUserDto): Promise<void> {
     await this.usersService.create(createUserDto);
     return null;

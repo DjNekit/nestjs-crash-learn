@@ -14,4 +14,10 @@ export class AuthController {
   async login(@Req() req) {
     return await this.authService.login(req.user);
   }
+
+  @Post('oauth2/redirect/google')
+  async redirect(@Req() req) {
+    console.log(req);
+    return null;
+  }
 }
