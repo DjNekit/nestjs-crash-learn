@@ -5,9 +5,12 @@ import { IUserData } from "../../users/interfaces/User";
 import { AuthService } from "../auth.service";
 
 @Injectable()
-export class LocalStrategy extends PassportStrategy(Strategy) {
+export class SigninStrategy extends PassportStrategy(Strategy, 'local') {
   constructor(private authService: AuthService) {
-    super({ usernameField: 'email' });
+    super({ 
+      usernameField: 'email',
+      passwordField: 'password'
+    });
   }
 
   async validate(email, password): Promise<IUserData> {

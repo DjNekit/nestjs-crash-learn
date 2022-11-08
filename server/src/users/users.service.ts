@@ -1,10 +1,12 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/createUserDto';
 import { UpdateUserDto } from './dto/updateUserDto';
 import { User } from './entity/user.entity';
 import { IUser } from './interfaces/User';
+
+import { v4 } from 'uuid';
 
 @Injectable()
 export class UsersService {
@@ -36,20 +38,39 @@ export class UsersService {
 
     return user;
   }
-
-  async create(userData: CreateUserDto): Promise<void> {
+  
+  async create(userData: CreateUserDto): Promise<IUser> {
     try {
+      const existingUser = await this.usersRepository.findOneBy({ email: userData.email });
+      
+      if (existingUser) {
+        throw new BadRequestException();
+      }
+      
       const newUser = new User();
-
+      newUser.refreshToken = v4();
+      
       for (const userField in userData) {
         newUser[userField] = userData[userField];
       }
-
+      
       await this.usersRepository.save(newUser);
+      
+      return newUser;
 
     } catch(e) {
-      throw new InternalServerErrorException();
+      throw new InternalServerErrorException('create was failed');
     }
+  }
+
+  async findAndUpdateById(id: number, updateData) {
+    const user = await this.usersRepository.findOneBy({ id });
+
+    for (const field in updateData) {
+      user[field] = updateData[field];
+    }
+
+    return await await this.usersRepository.save(user);
   }
 
   async update(updatedUserData: UpdateUserDto): Promise<IUser> {
