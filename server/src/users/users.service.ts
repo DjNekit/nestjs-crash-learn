@@ -6,8 +6,6 @@ import { UpdateUserDto } from './dto/updateUserDto';
 import { User } from './entity/user.entity';
 import { IUser } from './interfaces/User';
 
-import { v4 } from 'uuid';
-
 @Injectable()
 export class UsersService {
   constructor(
@@ -48,18 +46,17 @@ export class UsersService {
       }
       
       const newUser = new User();
-      newUser.refreshToken = v4();
       
       for (const userField in userData) {
         newUser[userField] = userData[userField];
       }
       
       await this.usersRepository.save(newUser);
-      
+
       return newUser;
 
     } catch(e) {
-      throw new InternalServerErrorException('create was failed');
+      throw new InternalServerErrorException(e.message);
     }
   }
 

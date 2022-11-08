@@ -1,7 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
 import { IUser, IUserData } from '../users/interfaces/User';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from 'src/users/dto/createUserDto';
@@ -65,15 +64,38 @@ export class AuthService {
     return tokens;
   }
 
-  async getTokens(id: number, email: string) {
-    const refreshToken = uuidv4();
+  async logout(id: number): Promise<void> {
+    try {
+      await this.usersService.findAndUpdateById(id, {
+        refreshToken: null
+      });
+    } catch(e) {
+      throw new InternalServerErrorException(e.message);
+    }
+  }
 
+  async refreshTokens() {
+    return {};
+  }
+
+  async getTokens(id: number, email: string) {
     const payload = {
       sub: id,
       email
     };
 
-    const accessToken = await this.jwtService.signAsync(payload);
+    const accessTokenOptions = {
+      expiresIn: '60s'
+    };
+
+    const refreshTokenOptions = {
+      expiresIn: '7d'
+    };
+
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, accessTokenOptions),
+      this.jwtService.signAsync(payload, refreshTokenOptions)
+    ]);
 
     return {
       accessToken,

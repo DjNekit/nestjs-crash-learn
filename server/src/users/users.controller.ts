@@ -4,7 +4,7 @@ import { IUser } from './interfaces/User';
 import { CreateUserDto } from './dto/createUserDto';
 import { UpdateUserDto } from './dto/updateUserDto';
 import { RolesGuard } from '../lib/guards/roles.guard';
-import { AccessJwtAuthGuard } from '../auth/guards/access-jwt.guard';
+import { AccessTokenGuard } from '../auth/guards/access-token.guard';
 
 @Controller({
   version: '1',
@@ -25,7 +25,7 @@ export class UsersController {
 
   @Put()
   @UseGuards(RolesGuard)
-  @UseGuards(AccessJwtAuthGuard)
+  @UseGuards(AccessTokenGuard)
   async create(@Body() createUserDto: CreateUserDto): Promise<void> {
     await this.usersService.create(createUserDto);
     return null;
