@@ -1,5 +1,6 @@
-import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Res, UseGuards } from '@nestjs/common';
 import * as cookie from 'cookie';
+import { User } from 'src/lib/decorators/user.decorator';
 import { CreateUserDto } from 'src/users/dto/createUserDto';
 import { AuthService } from './auth.service';
 import { SigninGuard } from './guards/signin.guard';
@@ -30,10 +31,25 @@ export class AuthController {
   @Post('/signin')
   @UseGuards(SigninGuard)
   async signIn(
-    @Req() req,
+    @User() user,
     @Res({ passthrough: true }) res
   ) {
-    const { accessToken, refreshToken } = await this.authService.signin(req.user);
+    const { accessToken, refreshToken } = await this.authService.signin(user);
+
+    res.setHeader('Set-Cookie', cookie.serialize('refresh-token', refreshToken, {
+      httpOnly: true
+    }));
+
+    return { accessToken };
+  }
+
+  @Post('/logout')
+  @UseGuards(SigninGuard)
+  async logout(
+    @User() user,
+    @Res({ passthrough: true }) res
+  ) {
+    const { accessToken, refreshToken } = await this.authService.signin(user);
 
     res.setHeader('Set-Cookie', cookie.serialize('refresh-token', refreshToken, {
       httpOnly: true
