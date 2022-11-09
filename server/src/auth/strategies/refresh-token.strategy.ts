@@ -1,6 +1,5 @@
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy } from "passport-jwt";
-import * as cookie from 'cookie';
 import { Request } from "express";
 
 export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'refresh-jwt') {

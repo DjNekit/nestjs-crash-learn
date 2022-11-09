@@ -1,16 +1,16 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { IUser, IUserData } from '../users/interfaces/User';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from 'src/users/dto/createUserDto';
+import { Payload, Tokens } from './interfaces/tokens';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
     private usersService: UsersService
-  ) {}
+  ) { }
 
   async validateUser(email: string, inputPassword: string) {
     const user = await this.usersService.findByEmail(email);
@@ -24,15 +24,19 @@ export class AuthService {
     return userData;
   }
 
-  async signin(user: IUserData) {
-    const { email, id, refreshToken } = user;
+  async signin(user): Promise<Tokens> {
+    const { email, id } = user;
 
     const payload = {
       email,
       sub: id
     };
 
-    const accessToken = await this.jwtService.signAsync(payload);
+    const { accessToken, refreshToken } = await this.getTokens(payload);
+
+    await this.usersService.updateByIdOrFail(id, {
+      refreshToken
+    });
 
     return { accessToken, refreshToken };
   }
@@ -48,53 +52,59 @@ export class AuthService {
 
     const salt = await bcrypt.genSalt();
     const hashPassword = await bcrypt.hash(password, salt);
-    
-    const newUser: IUser = await this.usersService.create({
+
+    const newUser = await this.usersService.create({
       ...createUserDto,
       password: hashPassword
     });
 
-    const tokens = await this.getTokens(newUser.id, newUser.email);
+    const payload = {
+      sub: newUser.id,
+      email
+    };
+
+    const tokens = await this.getTokens(payload);
 
 
-    await this.usersService.findAndUpdateById(newUser.id, {
+    await this.usersService.updateByIdOrFail(newUser.id, {
       refreshToken: tokens.refreshToken
     });
-    
+
     return tokens;
   }
 
   async logout(id: number): Promise<void> {
-    try {
-      await this.usersService.findAndUpdateById(id, {
+    await this.usersService.updateByIdOrFail(id, {
+      refreshToken: null
+    });
+  }
+
+  async refreshTokens(id: number, refreshToken: string): Promise<Tokens> {
+    const user = await this.usersService.findByIdOrFail(id);
+
+    const isRefreshTokenValide = refreshToken === user.refreshToken;
+
+    if (isRefreshTokenValide) {
+      await this.usersService.updateByIdOrFail(id, {
         refreshToken: null
       });
-    } catch(e) {
-      throw new InternalServerErrorException(e.message);
+      throw new UnauthorizedException();
     }
-  }
 
-  async refreshTokens() {
-    return {};
-  }
-
-  async getTokens(id: number, email: string) {
     const payload = {
-      sub: id,
-      email
+      sub: user.id,
+      email: user.email
     };
 
-    const accessTokenOptions = {
-      expiresIn: '60s'
-    };
+    const tokens = await this.getTokens(payload);
 
-    const refreshTokenOptions = {
-      expiresIn: '7d'
-    };
+    return tokens;
+  }
 
+  async getTokens(payload: Payload): Promise<Tokens> {
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload, accessTokenOptions),
-      this.jwtService.signAsync(payload, refreshTokenOptions)
+      this.jwtService.signAsync(payload, { expiresIn: '60s' }),
+      this.jwtService.signAsync(payload, { expiresIn: '7d' })
     ]);
 
     return {

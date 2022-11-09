@@ -1,67 +1,51 @@
-import { Injectable, InternalServerErrorException, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/createUserDto';
-import { UpdateUserDto } from './dto/updateUserDto';
 import { User } from './entity/user.entity';
-import { IUser } from './interfaces/User';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>
-  ) {}
+  ) { }
 
-  async findAll(): Promise<IUser[]> {
+  async findAll() {
     return await this.usersRepository.find();
   }
 
-  async findById(id: number): Promise<IUser> {
-    const user = await this.usersRepository.findOneBy({ id });
-
-    if (!user) {
-      return null;
-    }
-
+  async findByIdOrFail(id: number) {
+    const user = await this.usersRepository.findOneByOrFail({ id });
     return user;
   }
 
-  async findByEmail(email: string): Promise<IUser> {
+  async findByEmail(email: string) {
     const user = await this.usersRepository.findOneBy({ email });
-
-    if (!user) {
-      return null;
-    }
-
-    return user;
-  }
-  
-  async create(userData: CreateUserDto): Promise<IUser> {
-    try {
-      const existingUser = await this.usersRepository.findOneBy({ email: userData.email });
-      
-      if (existingUser) {
-        throw new BadRequestException();
-      }
-      
-      const newUser = new User();
-      
-      for (const userField in userData) {
-        newUser[userField] = userData[userField];
-      }
-      
-      await this.usersRepository.save(newUser);
-
-      return newUser;
-
-    } catch(e) {
-      throw new InternalServerErrorException(e.message);
-    }
+    return user || null;
   }
 
-  async findAndUpdateById(id: number, updateData) {
-    const user = await this.usersRepository.findOneBy({ id });
+  async create(userData: CreateUserDto) {
+    const { email } = userData;
+    const existingUser = await this.findByEmail(email);
+
+    if (existingUser) {
+      throw new BadRequestException('User already exist');
+    }
+
+    const newUser = new User();
+
+    for (const userField in userData) {
+      newUser[userField] = userData[userField];
+    }
+
+    await this.usersRepository.save(newUser);
+
+    return newUser;
+  }
+
+  async updateByIdOrFail(id: number, updateData) {
+    const user = await this.findByIdOrFail(id);
 
     for (const field in updateData) {
       user[field] = updateData[field];
@@ -70,21 +54,7 @@ export class UsersService {
     return await await this.usersRepository.save(user);
   }
 
-  async update(updatedUserData: UpdateUserDto): Promise<IUser> {
-    const { id, name, email } = updatedUserData;
-    const user = await this.usersRepository.findOneBy({ id });
-    
-    user.name = name;
-    user.email = email;
-
-    return await this.usersRepository.save(user);
-  }
-
   async delete(id: number): Promise<void> {
-    try {
-      await this.usersRepository.delete({ id });
-    } catch(e) {
-      throw new InternalServerErrorException();
-    }
+    await this.usersRepository.delete({ id });
   }
 }
