@@ -84,7 +84,7 @@ export class AuthService {
 
     const isRefreshTokenValide = refreshToken === user.refreshToken;
 
-    if (isRefreshTokenValide) {
+    if (!isRefreshTokenValide) {
       await this.usersService.updateByIdOrFail(id, {
         refreshToken: null
       });
