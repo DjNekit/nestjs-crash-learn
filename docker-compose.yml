@@ -10,7 +10,7 @@ services:
     ports:
       - '3000:3000'
     environment:
-      BACK_API: backend:4000
+      BACK_API: http://backend:4000
     networks:
       - app
 

@@ -1,8 +1,16 @@
 import { Button, Input, Stack } from "@chakra-ui/react";
+import axios from "axios";
 import Head from "next/head";
 import { Link } from "../components/Link";
 
 export default function SignupPage() {
+  const handleSubmit = () => {
+    axios.post('/api/signin', {
+      email: 'test1@test.com',
+      password: '12345678',
+    })
+  } 
+
   return (
     <div>
       <Head>
@@ -15,7 +23,7 @@ export default function SignupPage() {
           <Input placeholder='Enter username' size='lg' />
           <Input placeholder='Email' size='lg' />
           <Input placeholder='Password' size='lg' />
-          <Button>Sign up</Button>
+          <Button onClick={handleSubmit}>Sign up</Button>
         </Stack>
       </main>
     </div>
