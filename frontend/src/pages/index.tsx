@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import Link from 'next/link'
+import { Link } from '../components/Link'
 
 export default function Home() {
   return (
@@ -12,7 +12,8 @@ export default function Home() {
       <main>
         <h1>Home Page</h1>
         <div>
-          <Link href='/signup'>Sign Up</Link>
+          <Link href='/signup'>Sign Up</Link> <br />
+          <Link href='/signin'>Sign In</Link>
         </div>
       </main>
     </div>
