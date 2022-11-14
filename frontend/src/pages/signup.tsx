@@ -5,7 +5,7 @@ import { Link } from "../components/Link";
 
 export default function SignupPage() {
   const handleSubmit = () => {
-    axios.post('/api/signin', {
+    axios.post(`http://localhost/v1/auth/signin`, {
       email: 'test1@test.com',
       password: '12345678',
     })
