@@ -1,11 +1,11 @@
-import { Button, Input, Stack } from "@chakra-ui/react";
-import axios from "axios";
+import { Button, Input, propNames, Stack } from "@chakra-ui/react";
 import Head from "next/head";
 import { Link } from "../components/Link";
+import { makeRequest } from "../lib/axios";
 
-export default function SignupPage() {
+export default function SignupPage(props: any) {
   const handleSubmit = () => {
-    axios.post(`http://localhost/v1/auth/signin`, {
+    makeRequest().post('/auth/signin', {
       email: 'test1@test.com',
       password: '12345678',
     })
@@ -18,7 +18,7 @@ export default function SignupPage() {
       </Head>
       <main>
         <Link href='/'>To Home page</Link>
-        <h1>Sign Up page</h1>
+        <h1>Sign Up page {props.accessToken}</h1>
         <Stack spacing={3}>
           <Input placeholder='Enter username' size='lg' />
           <Input placeholder='Email' size='lg' />
@@ -29,3 +29,16 @@ export default function SignupPage() {
     </div>
   )
 }
+
+export async function getServerSideProps() {
+  const res = await makeRequest().post('/auth/signin', {
+    email: 'test1@test.com',
+    password: '12345678',
+  })
+
+  return {
+    props: {
+      accessToken: res.data.accessToken
+    }
+  }
+} 

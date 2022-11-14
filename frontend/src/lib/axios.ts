@@ -11,27 +11,42 @@ type ResType = {
   headers: AxiosResponseHeaders
 }
 
-export const axiosInstance = Axios.create({
-  baseURL: '/',
+export const makeRequest = () => {
+  if (typeof window === 'undefined') {
+    return axiosServer
+  }
+  return axiosClient
+}
+
+export const axiosClient = Axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API,
+  withCredentials: true,
+  // headers: {
+  //   'Access-Control-Allow-Origin': '*',
+  //   'Content-Type': 'application/json',
+  // }
+})
+export const axiosServer = Axios.create({
+  baseURL: process.env.API,
   withCredentials: true
 })
 
 const refreshAuthLogic = async (failedRequest: any) => {
-  const tokenRefreshResponse = await axiosInstance.post<null, ResType>('/api/refresh')
+  const tokenRefreshResponse = await axiosClient.post<null, ResType>('/api/refresh')
   
-  if (axiosInstance.defaults.headers.setCookie) {
-    delete axiosInstance.defaults.headers.setCookie
+  if (axiosClient.defaults.headers.setCookie) {
+    delete axiosClient.defaults.headers.setCookie
   }
 
   const { accessToken } = tokenRefreshResponse.data
   const bearer = `Bearer ${accessToken}`
-  axiosInstance.defaults.headers.Authorization = bearer
+  axiosClient.defaults.headers.Authorization = bearer
 
   const refreshCookieString = tokenRefreshResponse.headers['set-cookie']?.[0] as string
   const responseCookie = setCookie.parse(refreshCookieString)[0]
 
-  axiosInstance.defaults.headers.setCookie = tokenRefreshResponse.headers['set-cookie']!
-  axiosInstance.defaults.headers.cookie = cookie.serialize(
+  axiosClient.defaults.headers.setCookie = tokenRefreshResponse.headers['set-cookie']!
+  axiosClient.defaults.headers.cookie = cookie.serialize(
     responseCookie.name,
     responseCookie.value,
   )
@@ -40,4 +55,5 @@ const refreshAuthLogic = async (failedRequest: any) => {
   return Promise.resolve()
 }
 
-createAuthRefreshInterceptor(axiosInstance, refreshAuthLogic)
+createAuthRefreshInterceptor(axiosClient, refreshAuthLogic)
+createAuthRefreshInterceptor(axiosServer, refreshAuthLogic)
