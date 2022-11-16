@@ -1,7 +1,13 @@
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 import { Link } from '../components/Link'
+import { useUser } from '../hooks/useUser'
 
 export default function Home() {
+  const { user, isError } = useUser()
+  const router = useRouter()
+
+  
   return (
     <div>
       <Head>
@@ -12,8 +18,14 @@ export default function Home() {
       <main>
         <h1>Home Page</h1>
         <div>
-          <Link href='/signup'>Sign Up</Link> <br />
-          <Link href='/signin'>Sign In</Link>
+          {user ?
+            <Link href='/chats'>Chats</Link>
+          :
+            <>
+              <Link href='/signup'>Sign Up</Link> <br />
+              <Link href='/signin'>Sign In</Link>
+            </>
+          }
         </div>
       </main>
     </div>

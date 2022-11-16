@@ -3,7 +3,7 @@ import Head from "next/head";
 import { Link } from "../components/Link";
 import { makeRequest } from "../lib/axios";
 
-export default function SignupPage(props: any) {
+export default function SignupPage() {
   const handleSubmit = () => {
     makeRequest().post('/auth/signin', {
       email: 'test1@test.com',
@@ -18,7 +18,7 @@ export default function SignupPage(props: any) {
       </Head>
       <main>
         <Link href='/'>To Home page</Link>
-        <h1>Sign Up page {props.accessToken}</h1>
+        <h1>Sign Up page</h1>
         <Stack spacing={3}>
           <Input placeholder='Enter username' size='lg' />
           <Input placeholder='Email' size='lg' />
@@ -29,16 +29,3 @@ export default function SignupPage(props: any) {
     </div>
   )
 }
-
-export async function getServerSideProps() {
-  const res = await makeRequest().post('/auth/signin', {
-    email: 'test1@test.com',
-    password: '12345678',
-  })
-
-  return {
-    props: {
-      accessToken: res.data.accessToken
-    }
-  }
-} 

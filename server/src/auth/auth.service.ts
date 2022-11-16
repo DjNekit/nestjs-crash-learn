@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
@@ -88,7 +88,7 @@ export class AuthService {
       await this.usersService.updateByIdOrFail(id, {
         refreshToken: null
       });
-      throw new UnauthorizedException();
+      return null;
     }
 
     const payload = {

@@ -1,7 +1,4 @@
 import Axios, { AxiosResponseHeaders } from "axios";
-import createAuthRefreshInterceptor from 'axios-auth-refresh'
-import * as cookie from 'cookie'
-import * as setCookie from 'set-cookie-parser'
 
 type ResType = {
   data: {
@@ -12,48 +9,34 @@ type ResType = {
 }
 
 export const makeRequest = () => {
-  if (typeof window === 'undefined') {
-    return axiosServer
-  }
+  // if (typeof window === 'undefined') {
+  //   return axiosServer
+  // }
   return axiosClient
 }
+
+type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
 
 export const axiosClient = Axios.create({
   baseURL: process.env.NEXT_PUBLIC_API,
   withCredentials: true,
-  // headers: {
-  //   'Access-Control-Allow-Origin': '*',
-  //   'Content-Type': 'application/json',
-  // }
-})
-export const axiosServer = Axios.create({
-  baseURL: process.env.API,
-  withCredentials: true
 })
 
-const refreshAuthLogic = async (failedRequest: any) => {
-  const tokenRefreshResponse = await axiosClient.post<null, ResType>('/api/refresh')
-  
-  if (axiosClient.defaults.headers.setCookie) {
-    delete axiosClient.defaults.headers.setCookie
+axiosClient.interceptors.response.use(undefined, async (error) => {
+  const { url, method, data } = error.config
+  const parsedData = JSON.parse(data)
+
+  if (url === '/auth/refresh-tokens' || error.response.status !== 401) {
+    return Promise.reject(error);
   }
 
-  const { accessToken } = tokenRefreshResponse.data
+  const res = await axiosClient.post<null, ResType>('/auth/refresh-tokens')
+  const { accessToken } = res.data
   const bearer = `Bearer ${accessToken}`
   axiosClient.defaults.headers.Authorization = bearer
 
-  const refreshCookieString = tokenRefreshResponse.headers['set-cookie']?.[0] as string
-  const responseCookie = setCookie.parse(refreshCookieString)[0]
+  const retryFailedRequest = await axiosClient[method as Method](url, parsedData)
+  return Promise.resolve(retryFailedRequest);
+})
 
-  axiosClient.defaults.headers.setCookie = tokenRefreshResponse.headers['set-cookie']!
-  axiosClient.defaults.headers.cookie = cookie.serialize(
-    responseCookie.name,
-    responseCookie.value,
-  )
 
-  failedRequest.response.config.headers.Authorization = bearer
-  return Promise.resolve()
-}
-
-createAuthRefreshInterceptor(axiosClient, refreshAuthLogic)
-createAuthRefreshInterceptor(axiosServer, refreshAuthLogic)

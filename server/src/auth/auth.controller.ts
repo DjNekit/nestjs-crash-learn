@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { Cookies } from 'src/lib/decorators/cookie.decorator';
 import { User } from 'src/lib/decorators/user.decorator';
@@ -58,18 +58,32 @@ export class AuthController {
   }
 
   @Post('/refresh-tokens')
+  // async refreshTokens (@Req() req) {
+  //   console.log(req.cookies);
+  //   return {};
+  // }
   @UseGuards(RefreshTokenGuard)
   async refreshToken(
     @User('id') id: number,
     @Cookies('refresh-token') refreshToken: string,
     @Res({ passthrough: true }) res: Response
   ) {
-
     const tokens = await this.authService.refreshTokens(id, refreshToken);
-    setRefreshTokenInCookie(res, tokens.refreshToken);
+
+    if (!tokens) {
+      setRefreshTokenInCookie(res, '');
+      throw new UnauthorizedException();
+    }
+    console.log(tokens);
 
     return {
       accessToken: tokens.accessToken
     };
+  }
+
+  @Post('current-user')
+  @UseGuards(AccessTokenGuard)
+  async getCurrentUser(@User() user) {
+    return user;
   }
 }
