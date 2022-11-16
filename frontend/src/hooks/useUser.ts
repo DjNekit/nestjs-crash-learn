@@ -14,8 +14,9 @@ const fetcher = async (url: string) => {
 }
 
 export function useUser(options?: AuthOptions) {
-  const { data, error, mutate } = useSWR('/auth/current-user/', fetcher, {
-    shouldRetryOnError: false
+  const { data, error, mutate } = useSWR('/v1/auth/current-user/', fetcher, {
+    shouldRetryOnError: false,
+    revalidateOnFocus: false
   })
 
   const router = useRouter()

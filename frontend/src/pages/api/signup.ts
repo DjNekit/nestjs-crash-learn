@@ -1,5 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { setHeaders } from '../../helpers/setHeaders';
 
 export default async function handler(
   req: NextApiRequest,
@@ -8,20 +9,14 @@ export default async function handler(
   try {
     const { body, headers } = req;
     const { data, headers: returnedHeaders } = await axios.post(
-      `${process.env.API}/auth/signup`,
+      `${process.env.API}/v1/auth/signup`,
       body,
-      { 
-        headers,
-        withCredentials: true
-      }
+      { headers }
     );
 
-    Object.entries(returnedHeaders).forEach(([headerKey, value]) => {
-      res.setHeader(headerKey, value as string)
-    })
+    setHeaders(res, returnedHeaders)
 
     res.send(data)
-
   } catch (e: any) {
     const { data } = e.response
     res.status(data.statusCode).json(data)

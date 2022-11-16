@@ -1,11 +1,10 @@
 import Head from 'next/head'
-import { useRouter } from 'next/router'
+import { api } from '../api'
 import { Link } from '../components/Link'
 import { useUser } from '../hooks/useUser'
 
 export default function Home() {
-  const { user, isLoading, isError } = useUser()
-  const router = useRouter()
+  const { user, isLoading, isError, mutate } = useUser({ redirect: false })
 
   if (isLoading) {
     return (
@@ -13,6 +12,10 @@ export default function Home() {
     )
   }
 
+  const logout = async () => {
+    await api.logout()
+    location.reload()
+  }
   
   return (
     <div>
@@ -25,7 +28,10 @@ export default function Home() {
         <h1>Home Page</h1>
         <div>
           {user ?
-            <Link href='/chats'>Chats</Link>
+            <>
+              <Link href='/chats'>Chats</Link>
+              <div onClick={logout}>Logout</div>
+            </>
           :
             <>
               <Link href='/signup'>Sign Up</Link> <br />

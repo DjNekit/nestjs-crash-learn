@@ -6,12 +6,7 @@ import { useUser } from "../hooks/useUser";
 
 export default function ChatsPage() {
   const { user, isLoading, isError } = useUser({ redirect: true })
-  useEffect(() => {
-    api.login({
-      email: 'test@test.com',
-      password: '12345678'
-    })
-  }, [])
+  
   if (!user) {
     return <h1>Loading...</h1>
   }

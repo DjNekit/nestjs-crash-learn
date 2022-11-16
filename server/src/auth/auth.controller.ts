@@ -56,12 +56,7 @@ export class AuthController {
 
     return {};
   }
-
   @Post('/refresh-tokens')
-  // async refreshTokens (@Req() req) {
-  //   console.log(req.cookies);
-  //   return {};
-  // }
   @UseGuards(RefreshTokenGuard)
   async refreshToken(
     @User('id') id: number,
@@ -72,7 +67,7 @@ export class AuthController {
 
     if (!tokens) {
       setRefreshTokenInCookie(res, '');
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('refresh error');
     }
 
     return {

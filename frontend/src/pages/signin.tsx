@@ -6,7 +6,6 @@ import Router from "next/router";
 import { api } from "../api";
 import { Link } from "../components/Link";
 import { useUser } from "../hooks/useUser";
-import { axiosClient } from "../lib/axios";
 
 export default function SigninPage() {
   const {user, isLoading, isError, mutate} = useUser()
@@ -24,16 +23,11 @@ export default function SigninPage() {
     )
   }
 
-  const login = async () => {
-    api.login({
+  const submit = async () => {
+    await api.login({
       email: 'test@test.com',
       password: '12345678'
     })
-    mutate()
-  }
-
-  const submit = async () => {
-    await login()
     mutate()
   }
 
