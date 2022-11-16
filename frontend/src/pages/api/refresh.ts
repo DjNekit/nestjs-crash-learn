@@ -7,10 +7,10 @@ export default async function handler(
 ) {
   try {
     const { headers } = req;
-  
+
     const { data, headers: returnedHeaders } = await axios.post(
-      `${process.env.BACK_API}/v1/auth/refresh-tokens`,
-      null,
+      `http://nginx:3000/v1/auth/refresh-tokens`,
+      undefined, 
       { headers }
     );
 
@@ -21,7 +21,6 @@ export default async function handler(
     res.send(data)
 
   } catch (e) {
-    console.log(e)
-    res.send(e)
+    res.status(200).json({})
   }
 }

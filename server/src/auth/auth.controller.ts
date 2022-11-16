@@ -74,7 +74,6 @@ export class AuthController {
       setRefreshTokenInCookie(res, '');
       throw new UnauthorizedException();
     }
-    console.log(tokens);
 
     return {
       accessToken: tokens.accessToken

@@ -4,8 +4,14 @@ import { Link } from '../components/Link'
 import { useUser } from '../hooks/useUser'
 
 export default function Home() {
-  const { user, isError } = useUser()
+  const { user, isLoading, isError } = useUser()
   const router = useRouter()
+
+  if (isLoading) {
+    return (
+      <h1>Loading</h1>
+    )
+  }
 
   
   return (

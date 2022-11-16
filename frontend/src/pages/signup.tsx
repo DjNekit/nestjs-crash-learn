@@ -1,11 +1,11 @@
 import { Button, Input, propNames, Stack } from "@chakra-ui/react";
 import Head from "next/head";
 import { Link } from "../components/Link";
-import { makeRequest } from "../lib/axios";
+import { axiosClient } from "../lib/axios";
 
 export default function SignupPage() {
   const handleSubmit = () => {
-    makeRequest().post('/auth/signin', {
+    axiosClient.post('/auth/signin', {
       email: 'test1@test.com',
       password: '12345678',
     })

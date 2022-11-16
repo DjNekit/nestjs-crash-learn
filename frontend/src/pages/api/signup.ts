@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 export default async function handler(
@@ -7,11 +7,13 @@ export default async function handler(
 ) {
   try {
     const { body, headers } = req;
-    console.log(body)
     const { data, headers: returnedHeaders } = await axios.post(
-      `${process.env.BACK_API}/v1/auth/signup`,
+      `${process.env.API}/auth/signup`,
       body,
-      { headers }
+      { 
+        headers,
+        withCredentials: true
+      }
     );
 
     Object.entries(returnedHeaders).forEach(([headerKey, value]) => {

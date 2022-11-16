@@ -1,25 +1,35 @@
 import { Button, Input, Stack } from "@chakra-ui/react";
+import axios from "axios";
+import { ApiError } from "next/dist/server/api-utils";
 import Head from "next/head";
 import Router from "next/router";
-import { mutate } from "swr";
+import { api } from "../api";
 import { Link } from "../components/Link";
-import { useAuth } from "../hooks/useAuth";
 import { useUser } from "../hooks/useUser";
-import { makeRequest } from "../lib/axios";
+import { axiosClient } from "../lib/axios";
 
 export default function SigninPage() {
-  const {user, isError, mutate} = useUser()
+  const {user, isLoading, isError, mutate} = useUser()
+
+  if (isLoading) {
+    return (
+      <h1>Loading...</h1>
+    )
+  }
 
   if (user) {
     Router.replace('/chats')
+    return (
+      <h1>Redirect...</h1>
+    )
   }
 
   const login = async () => {
-    console.log('click')
-    const res = await makeRequest().post('/auth/signin', {
+    api.login({
       email: 'test@test.com',
       password: '12345678'
     })
+    mutate()
   }
 
   const submit = async () => {

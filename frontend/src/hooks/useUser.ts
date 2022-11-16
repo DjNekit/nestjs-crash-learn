@@ -1,23 +1,23 @@
+import { AxiosResponse } from "axios";
 import useSWR from "swr"
-import { axiosClient, makeRequest } from "../lib/axios"
 import { useRouter } from 'next/router';
-import { auth } from "../lib/Auth";
+import { axiosClient } from "../lib/axios"
 
 interface AuthOptions {
   redirect?: boolean
 }
 
-const fetcher = async (...args: any) => {
+const fetcher = async (url: string) => {
   return axiosClient
-  //@ts-ignore
-    .post(...args, { test: 'test' })
-    .then((res: any) => res.data)
+    .post(url)
+    .then((res: AxiosResponse) => res.data)
 }
 
 export function useUser(options?: AuthOptions) {
   const { data, error, mutate } = useSWR('/auth/current-user/', fetcher, {
-  
+    shouldRetryOnError: false
   })
+
   const router = useRouter()
 
   if (error && options?.redirect) {

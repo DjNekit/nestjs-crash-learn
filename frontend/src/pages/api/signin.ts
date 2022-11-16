@@ -9,9 +9,12 @@ export default async function handler(
     const { body, headers } = req;
   
     const { data, headers: returnedHeaders } = await axios.post(
-      `${process.env.BACK_API}/v1/auth/signin`,
+      `${process.env.API}/auth/signin`,
       body,
-      { headers }
+      { 
+        headers,
+        withCredentials: true
+      }
     );
 
     Object.entries(returnedHeaders).forEach(([headerKey, value]) => {
