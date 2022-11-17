@@ -1,3 +1,4 @@
+import { Button } from '@chakra-ui/react'
 import Head from 'next/head'
 import { api } from '../api'
 import { Link } from '../components/Link'
@@ -30,7 +31,7 @@ export default function Home() {
           {user ?
             <>
               <Link href='/chats'>Chats</Link>
-              <div onClick={logout}>Logout</div>
+              <Button onClick={logout}>Logout</Button>
             </>
           :
             <>
